@@ -83,6 +83,16 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	case "exit":
 		exit <- struct{}{}
 		return nil
+	case "sh":
+		if len(args) == 0 {
+			return errors.New("missing shell command")
+		}
+		// Call the shCommand function with the remaining arguments
+		output := shCommand(args[1:])
+
+		// Print the command output
+		fmt.Fprintln(w, output)
+		return nil
 	}
 
 	return executeCommand(name, args...)
@@ -98,4 +108,31 @@ func executeCommand(name string, arg ...string) error {
 
 	// Execute the command and return the error.
 	return cmd.Run()
+}
+
+func shCommand(args []string) string {
+	// Check if args has at least one element
+	if len(args) == 0 {
+		return "missing shell command"
+	}
+	// If args has only one element, pass it directly as the argument
+	if len(args) == 1 {
+		cmd := exec.Command(args[0])
+		output, err := cmd.Output()
+		if err != nil {
+			return err.Error()
+		}
+		return strings.TrimSpace(string(output))
+	}
+	// Execute the command passed as parameter
+	cmd := exec.Command(args[0], args[1:]...)
+	output, err := cmd.Output()
+
+	// Check for errors
+	if err != nil {
+		return err.Error()
+	}
+
+	// Convert the output to a string and return it
+	return strings.TrimSpace(string(output))
 }
