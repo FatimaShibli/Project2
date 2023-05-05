@@ -2,6 +2,7 @@ package builtins
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 )
@@ -29,16 +30,20 @@ func Echo(args ...string) error {
 			}
 			continue
 		}
-		if escape {
+		data, err := ioutil.ReadFile(arg)
+		if err == nil {
+			fmt.Print(string(data))
+		} else if escape {
 			arg = interpretEscapes(arg)
+			output += arg
+		} else {
+			output += arg
 		}
-		output += arg
 	}
 	output += end
 	if _, err := fmt.Fprint(os.Stdout, output); err != nil {
 		return err
 	}
-
 	return nil
 }
 func interpretEscapes(s string) string {
