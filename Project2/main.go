@@ -76,6 +76,8 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	switch name {
 	case "cd":
 		return builtins.ChangeDirectory(args...)
+	case "echo":
+		return builtins.Echo(args...)
 	case "env":
 		return builtins.EnvironmentVariables(w, args...)
 	case "exit":
