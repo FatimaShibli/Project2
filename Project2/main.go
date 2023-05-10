@@ -83,17 +83,6 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	case "exit":
 		exit <- struct{}{}
 		return nil
-	case "ls":
-		arg := "-l"
-		if len(args) > 0 {
-			arg = args[0]
-		}
-		return executeCommand("ls", arg)
-	case "mkdir":
-		if len(args) < 1 {
-			return errors.New("missing directory name")
-		}
-		return executeCommand("mkdir", args[0])
 	case "sh":
 		if len(args) == 0 {
 			return errors.New("missing shell command")
@@ -104,7 +93,13 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 		// Print the command output
 		fmt.Fprintln(w, output)
 		return nil
+	case "bash":
+		if len(args) == 0 {
+			return errors.New("missing script path")
+		}
+		return executeBashScript(args[0], args[1:])
 	}
+	
 
 	return executeCommand(name, args...)
 }
@@ -119,6 +114,29 @@ func executeCommand(name string, arg ...string) error {
 
 	// Execute the command and return the error.
 	return cmd.Run()
+}
+
+func executeBashScript(scriptPath string, args []string) error {
+    var cmd *exec.Cmd
+
+    // Check if bash is available
+    _, err := exec.LookPath("bash")
+    if err == nil {
+        cmd = exec.Command("bash", scriptPath)
+    } else {
+        // Fallback to sh if bash is not available
+        cmd = exec.Command("sh", scriptPath)
+    }
+
+    // Pass arguments to the command
+    cmd.Args = append(cmd.Args, args...)
+
+    // Set the correct output device.
+    cmd.Stderr = os.Stderr
+    cmd.Stdout = os.Stdout
+
+    // Execute the command and return the error.
+    return cmd.Run()
 }
 
 func shCommand(args []string) string {
