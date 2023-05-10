@@ -83,6 +83,17 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 	case "exit":
 		exit <- struct{}{}
 		return nil
+	case "ls":
+		arg := "-l"
+		if len(args) > 0 {
+			arg = args[0]
+		}
+		return executeCommand("ls", arg)
+	case "mkdir":
+		if len(args) < 1 {
+			return errors.New("missing directory name")
+		}
+		return executeCommand("mkdir", args[0])
 	case "sh":
 		if len(args) == 0 {
 			return errors.New("missing shell command")
