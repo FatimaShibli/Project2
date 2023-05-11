@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -9,12 +10,14 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/jh125486/CSCE4600/Project2/builtins"
+	"github.com/FatimaShibli/Project2/Project2/builtins"
+	//"github.com/jh125486/CSCE4600/Project2/builtins"
 )
 
 func main() {
 	exit := make(chan struct{}, 2) // buffer this so there's no deadlock.
 	runLoop(os.Stdin, os.Stdout, os.Stderr, exit)
+
 }
 
 func runLoop(r io.Reader, w, errW io.Writer, exit chan struct{}) {
@@ -78,6 +81,8 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 		return builtins.ChangeDirectory(args...)
 	case "echo":
 		return builtins.Echo(args...)
+	case "ls":
+		return builtins.List(args...)
 	case "env":
 		return builtins.EnvironmentVariables(w, args...)
 	case "exit":
@@ -88,7 +93,7 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 			return errors.New("missing shell command")
 		}
 		// Call the shCommand function with the remaining arguments
-		output := shCommand(args[1:])
+		output := shCommand(args)
 
 		// Print the command output
 		fmt.Fprintln(w, output)
@@ -99,7 +104,6 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 		}
 		return executeBashScript(args[0], args[1:])
 	}
-	
 
 	return executeCommand(name, args...)
 }
@@ -117,26 +121,26 @@ func executeCommand(name string, arg ...string) error {
 }
 
 func executeBashScript(scriptPath string, args []string) error {
-    var cmd *exec.Cmd
+	var cmd *exec.Cmd
 
-    // Check if bash is available
-    _, err := exec.LookPath("bash")
-    if err == nil {
-        cmd = exec.Command("bash", scriptPath)
-    } else {
-        // Fallback to sh if bash is not available
-        cmd = exec.Command("sh", scriptPath)
-    }
+	// Check if bash is available
+	_, err := exec.LookPath("bash")
+	if err == nil {
+		cmd = exec.Command("bash", scriptPath)
+	} else {
+		// Fallback to sh if bash is not available
+		cmd = exec.Command("sh", scriptPath)
+	}
 
-    // Pass arguments to the command
-    cmd.Args = append(cmd.Args, args...)
+	// Pass arguments to the command
+	cmd.Args = append(cmd.Args, args...)
 
-    // Set the correct output device.
-    cmd.Stderr = os.Stderr
-    cmd.Stdout = os.Stdout
+	// Set the correct output device.
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
 
-    // Execute the command and return the error.
-    return cmd.Run()
+	// Execute the command and return the error.
+	return cmd.Run()
 }
 
 func shCommand(args []string) string {
