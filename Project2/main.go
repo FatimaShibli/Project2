@@ -89,15 +89,7 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 		exit <- struct{}{}
 		return nil
 	case "sh":
-		if len(args) == 0 {
-			return errors.New("missing shell command")
-		}
-		// Call the shCommand function with the remaining arguments
-		output := shCommand(args)
-
-		// Print the command output
-		fmt.Fprintln(w, output)
-		return nil
+		return builtins.Sh(args...)
 	case "bash":
 		if len(args) == 0 {
 			return errors.New("missing script path")
