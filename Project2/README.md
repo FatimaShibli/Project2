@@ -1,6 +1,19 @@
+# To run the code please follow the following steps on VS code:
+- go mod init gin
+- go mod tidy
+- go get github.com/FatimaShibli/Project2/Project2/builtins
+- make sure you are in the right directoru and then use the command "go run main.go"
+
+
+
+
+
+
+
+
 # Project 2: Shell Builtins
 
-## Description
+ Description
 
 For this project we'll be adding commands to a simple shell. 
 
