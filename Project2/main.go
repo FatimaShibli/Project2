@@ -95,6 +95,8 @@ func handleInput(w io.Writer, input string, exit chan<- struct{}) error {
 			return errors.New("missing script path")
 		}
 		return executeBashScript(args[0], args[1:])
+	case "pwd":
+		return builtins.Pwd(w, args...)
 	}
 
 	return executeCommand(name, args...)
